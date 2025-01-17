@@ -1,0 +1,39 @@
+<html lang="">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Hello!</title>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.2/css/bulma.min.css"/>
+         <script src="https://cdn.jsdelivr.net/npm/gridjs/dist/gridjs.umd.js"></script>
+        <link href="https://cdn.jsdelivr.net/npm/gridjs/dist/theme/mermaid.min.css" rel="stylesheet" />
+    </head>
+    <body>
+        <h3 class="title">Projects</h3>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Created</th>
+                    <th>Nombre</th>
+                    <th>Tech</th>
+                    <th>Branch</th>
+                    <th>Commit</th>
+                    <th>CodeOwners</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for project in projects %}
+                <tr>
+                    <td>{{loop.index}}</td>
+                    <td>{{project.created_at}}</td>
+                    <td><a target="_blank" href="{{project.url}}">{{project.name}}</a></td>
+                    <td>{{project.technology}}</td>
+                    <td>{{project.default_branch}}</td>
+                    <td><a target="_blank" href="{{project.url}}">{{project.last_commit_date}}</a></td>
+                    <td>{{project.codeowners_join()}}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </body>
+</html>
