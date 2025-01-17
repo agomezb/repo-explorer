@@ -1,0 +1,15 @@
+# Repo Explorer
+
+Repo Explorer is a tool designed to help developers explore and manage their code repositories efficiently. It provides a user-friendly interface to navigate through files, view code, and perform various repository management tasks.
+
+## Features
+
+- Browse and explore code repositories
+- View and edit files
+- Search for files and content within the repository
+- Manage repository settings
+- Integration with version control systems
+
+## Installation
+
+To install Repo Explorer, clone the repository and install the dependencies:
