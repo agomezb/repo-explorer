@@ -8,3 +8,5 @@ celery~=5.4.0
 pymediator~=0.3.0
 pydantic~=2.10.4
 starlette~=0.41.3
+pydantic-settings~=2.7.1
+python-dotenv~=1.0.1

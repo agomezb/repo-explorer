@@ -30,3 +30,8 @@ class Project(Entity):
         for code_owner in self.codeowners:
             join_names += ','.join(code_owner.owners)
         return join_names
+
+    def basic_dump(self):
+        return self.model_dump(include={'name', 'url', 'default_branch',
+                                        'external_id', 'created_at', 'last_commit_url',
+                                        'technology','last_commit_date', 'description'})

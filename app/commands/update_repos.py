@@ -2,14 +2,14 @@
 import os
 import sys
 
-ruta = os.path.realpath(os.path.join(os.path.dirname(__file__), '../'))
-sys.path.append(ruta)
+module_path = os.path.realpath(os.path.join(os.path.dirname(__file__), '../../'))
+sys.path.append(module_path)
 
 import typer
 
 typer_app = typer.Typer()
 from app.infraestructure.project_repository import ProjectRepository
-from app.broker import sync_repos_task, sync_complementary_data_task
+from app.features.sync.tasks import sync_repos_task, sync_complementary_data_task
 
 
 @typer_app.command()

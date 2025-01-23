@@ -5,9 +5,10 @@ from typing import Optional, List
 from github import Auth, Github, UnknownObjectException, GithubException
 from gql import Client
 from gql.transport.aiohttp import AIOHTTPTransport
-from pydantic import BaseModel
+from pydantic import BaseModel, model_serializer
 
-from app.services.queries import query_get_repos
+from app.config import settings
+from app.infraestructure.services.queries import query_get_repos
 
 class LanguageRepositoryDto(BaseModel):
     name: str
@@ -24,12 +25,15 @@ class CodeRepositoryDto(BaseModel):
     languages: List[LanguageRepositoryDto] = None
     description: Optional[str] = None
 
+    def model_dump(self, **kwargs) -> dict:
+        return super().model_dump(exclude={'id'}, **kwargs)
+
 
 class GithubCodeRepositoryService:
 
     def __init__(self):
-        self.organization_name = ""
-        self.token = ""
+        self.organization_name = settings.github_organization_name
+        self.token = settings.github_token
         self.github_client = Github(auth=Auth.Token(self.token))
 
         headers = {
@@ -44,24 +48,24 @@ class GithubCodeRepositoryService:
         repository_list = []
         query_params = {
             "organization": self.organization_name,
-            "take": 5,
+            "take": 100,
             "after": None
         }
         while make_request:
             code_repositories_response = self.graphql_client.execute(query_get_repos, variable_values=query_params)
             code_repositories_dict = code_repositories_response.get("organization").get("repositories").get("nodes")
             page_info_dict = code_repositories_response.get("organization").get("repositories").get("pageInfo")
-            if False and page_info_dict and page_info_dict.get("hasNextPage") and page_info_dict.get("endCursor"):
+            if page_info_dict and page_info_dict.get("hasNextPage") and page_info_dict.get("endCursor"):
                 query_params["after"] = page_info_dict["endCursor"]
             else:
                 make_request = False
             repository_list.extend(
-                [self.__transform_graphql_dto(item)
+                [self.__map_graphql_dto(item)
                  for item in code_repositories_dict]
             )
         return repository_list
 
-    def __transform_graphql_dto(self, code_repository_response) -> CodeRepositoryDto:
+    def __map_graphql_dto(self, code_repository_response) -> CodeRepositoryDto:
         branch_ref = code_repository_response.get('defaultBranchRef')
         branch_commit = branch_ref.get('target') if branch_ref else None
         return CodeRepositoryDto(
@@ -72,8 +76,14 @@ class GithubCodeRepositoryService:
             description=code_repository_response["description"],
             default_branch= branch_ref.get('name') if branch_ref else None,
             last_commit_date=branch_commit.get('committedDate') if branch_commit else None,
+            languages=self.__map_languages(code_repository_response),
             last_commit_url=branch_commit.get('commitUrl') if branch_commit else None,)
 
+    def __map_languages(self, code_repository_response):
+        languages_dto = code_repository_response.get("languages",{})
+        return [LanguageRepositoryDto(
+                    name=language["node"].get("name"),
+                    size=language["size"]) for language in languages_dto.get("edges", [])]
 
     async def fetch_repos_async(self) -> List[CodeRepositoryDto]:
         async with self.graphql_client as session:

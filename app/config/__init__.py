@@ -1,16 +1,12 @@
-
-from pymediator import Mediator as _Mediator, SingletonRegistry
-
-from app.features.code_repository import FetchCodeRepositoriesRequest, FetchCodeRepositoriesHandler, \
-    SyncComplentaryDataRequest, SyncComplentaryDataHandler
-
-registry: SingletonRegistry = SingletonRegistry()
-registry.register(FetchCodeRepositoriesRequest, FetchCodeRepositoriesHandler)
-registry.register(SyncComplentaryDataRequest, SyncComplentaryDataHandler)
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
-class Mediator(_Mediator):
-    def __init__(self) -> None:
-        super().__init__(registry=SingletonRegistry())
+class Settings(BaseSettings):
+    mongo_uri: str
+    rabbitmq_uri: str
+    github_token: str
+    github_organization_name: str
 
-mediator: Mediator = Mediator()
+    model_config = SettingsConfigDict(env_file=".env")
+
+settings = Settings()

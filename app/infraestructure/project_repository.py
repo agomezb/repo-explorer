@@ -3,13 +3,14 @@ from typing import Any, Mapping
 from bson import ObjectId
 from pymongo import MongoClient
 
+from app.config import settings
 from app.domain.entities import Project
 
 
 class ProjectRepository:
 
     def __init__(self):
-        self._client = MongoClient("", tlsInsecure=True)
+        self._client = MongoClient(settings.mongo_uri, tlsInsecure=True)
         database = self._client['RepoExplorer']
         self._collection = database["project"]
 
@@ -34,16 +35,7 @@ class ProjectRepository:
         return project_id
 
     def save_basic_information(self, project: Project):
-        data = {
-            'name': project.name,
-            'url': project.url,
-            'default_branch': project.default_branch,
-            'external_id': project.external_id,
-            'created_at': project.created_at,
-            'last_commit_url': project.last_commit_url,
-            'last_commit_date': project.last_commit_date,
-            'description': project.description
-        }
+        data = project.basic_dump()
         self._collection.update_one({'external_id': data['external_id']}, {"$set": data}, upsert=True)
 
     def get(self, project_id: str):
